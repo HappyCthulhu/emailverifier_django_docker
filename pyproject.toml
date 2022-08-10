@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "emailverifier-django-docker"
+version = "0.1.0"
+description = ""
+authors = ["Валерий Газаров <v.gazarov@fortus.pro>"]
+readme = "README.md"
+packages = [{include = "emailverifier_django_docker"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+djangorestframework = "==3.11.2"
+drf-yasg = "*"
+sentry-sdk = "*"
+tqdm = "*"
+pendulum = "*"
+setuptools = "==50.3.2"
+requests = "*"
+urllib3 = "==1.26.0"
+pandas = "*"
+Django = "3.2"
+asgiref = "^3.5.2"
+psycopg2-binary = "^2.9.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
