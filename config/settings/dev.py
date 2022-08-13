@@ -1,3 +1,5 @@
+import os
+
 from .base import *
 
 DEBUG = True
@@ -7,11 +9,11 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 DATABASES = {
     'default': {
-        'NAME': 'email_verifier',
+        'NAME': os.environ['DB_NAME'],
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'USER': 'dev',
         'PASSWORD': 'dev',
-        'HOST': '127.0.0.1',
+        'HOST': os.environ['DB_HOST'],
         'PORT': 5432,
     },
 }
@@ -51,12 +53,12 @@ LOGGING = {
         },
         'sql.file': {
             'level': 'DEBUG',
-            'class': 'common.logging.Utf8FileHandler',
+            'class': 'app.common.logging.Utf8FileHandler',
             'filename': ROOT_DIR.parent / 'log' / 'sql.log',
         },
         'error.file': {
             'level': 'ERROR',
-            'class': 'common.logging.Utf8FileHandler',
+            'class': 'app.common.logging.Utf8FileHandler',
             'filename': ROOT_DIR.parent / 'log' / 'error.log',
         },
     },
@@ -77,8 +79,8 @@ LOGGING = {
 # REDIS related settings
 REDIS_HOST = 'localhost'
 REDIS_PORT = '6379'
-BROKER_URL = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
 BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
+CELERY_BROKER_URL = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
 CELERY_RESULT_BACKEND = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
 
 CACHES = {
@@ -91,3 +93,12 @@ CACHES = {
 
 PROXY_TOKEN = 'vigd38lm64'
 PROXY_DOMAIN = 'http://127.0.0.1:8031/'
+
+
+EMAIL_HOST = os.environ['EMAIL_HOST']
+EMAIL_PORT = os.environ['EMAIL_PORT']
+
+EMAIL_SENDER = {
+    'email': os.environ['EMAIL_SENDER_EMAIL'],
+    'password': os.environ['EMAIL_SENDER_PASSWORD']
+}
