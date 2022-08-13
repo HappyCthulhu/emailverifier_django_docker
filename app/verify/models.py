@@ -3,9 +3,9 @@ from pathlib import Path
 import pandas as pd
 from django.db import models
 
-from common.fields import UidForeignKey
-from common.models import UidPrimaryModel, TimeStampedModel, NameModel
-from verify.clients import MillionVerifierClient
+from app.common.fields import UidForeignKey
+from app.common.models import UidPrimaryModel, TimeStampedModel, NameModel
+from app.verify.clients import MillionVerifierClient
 
 
 def get_upload_path(instance, filename):
@@ -16,22 +16,27 @@ class File(UidPrimaryModel, TimeStampedModel, NameModel):
     upload_file = models.FileField(upload_to=get_upload_path, verbose_name='Эксель таблица с email')
 
     def check_emails(self) -> None:
-        """
-        Проверить все email в таблице
-        """
         df = self._get_data_frame()
         # Заменяю nan на None
         df_notnull = df.where(pd.notnull(df), None)
-        for i, row in df_notnull.iterrows():
-            # TODO нужно выполнять асинхронно
-            client = MillionVerifierClient()
+        for _, row in df_notnull.iterrows():
             email = row['email']
             code_response = client.check_email(email=email)
-            Verify.objects.create(
+
+            email_obj = Verify.objects.create(
                 email=email,
                 file=self,
                 result_code=code_response
             )
+
+    FILE_STATUSES = (
+        ('new', 'Новый'),
+        ('processed', 'Обработан'),
+        ('error', 'Ошибка'),
+        ('processing', 'Добавляется в базу')
+    )
+
+    status = models.CharField(max_length=32, choices=FILE_STATUSES, default='new', blank=True)
 
     def _get_data_frame(self) -> pd.DataFrame:
         return pd.read_excel(Path(self.upload_file.path))
@@ -59,7 +64,13 @@ class Verify(UidPrimaryModel, TimeStampedModel):
 
     file = UidForeignKey(File, on_delete=models.CASCADE, verbose_name='Таблица с email', null=True, blank=True)
     email = models.EmailField('Проверяемый email', max_length=512)
-    result_code = models.PositiveSmallIntegerField(choices=CODE_CHOICES)
+    result_code = models.PositiveSmallIntegerField(choices=CODE_CHOICES, null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.email} - {self.result_code}'
 
     class Meta:
         verbose_name = 'Проверка email'
+
+
+client = MillionVerifierClient()
