@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+
+    django-server: 
+        build:
+            context: .
+            dockerfile: Dockerfile.django
+        env_file: Docker.env
+        depends_on:
+            - postgres
+        entrypoint: /email_verifier/entrypoint.sh
+        ports:
+            - '8000:8000'
+
+    postgres:
+        container_name: postgres_cont
+        image: postgres
+        environment:
+            - POSTGRES_USER=dev
+            - POSTGRES_PASSWORD=dev
+            - POSTGRES_DB=email_verifier
+            - POSTGRES_HOST=host.docker.internal
+        ports:
+            - "5432:5432"
