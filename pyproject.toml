@@ -2,9 +2,8 @@
 name = "emailverifier-django-docker"
 version = "0.1.0"
 description = ""
-authors = ["Валерий Газаров <v.gazarov@fortus.pro>"]
+authors = ["Валерий Газаров"]
 readme = "README.md"
-packages = [{include = "emailverifier_django_docker"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -20,6 +19,9 @@ pandas = "*"
 Django = "3.2"
 asgiref = "^3.5.2"
 psycopg2-binary = "^2.9.3"
+openpyxl = "^3.0.10"
+celery = "^5.2.7"
+redis = "^4.3.4"
 
 
 [build-system]
