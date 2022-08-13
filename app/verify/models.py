@@ -2,6 +2,8 @@ from pathlib import Path
 
 import pandas as pd
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 from app.common.fields import UidForeignKey
 from app.common.models import UidPrimaryModel, TimeStampedModel, NameModel
@@ -28,6 +30,7 @@ class File(UidPrimaryModel, TimeStampedModel, NameModel):
                 file=self,
                 result_code=code_response
             )
+
 
     FILE_STATUSES = (
         ('new', 'Новый'),
@@ -73,4 +76,12 @@ class Verify(UidPrimaryModel, TimeStampedModel):
         verbose_name = 'Проверка email'
 
 
-client = MillionVerifierClient()
+class Message(UidPrimaryModel, TimeStampedModel):
+    message_text = models.TextField('Текст сообщения', max_length=4096, blank=True)
+    message_was_sent = models.BooleanField(default=False, verbose_name='Сообщение отправлено')
+    message_recipient = models.ForeignKey(Verify, on_delete=models.CASCADE, verbose_name='Получатель', null=True,
+                                          blank=True, limit_choices_to={'result_code': Verify.CODE_OK})
+
+    class Meta:
+        verbose_name = 'Отправка message'
+
