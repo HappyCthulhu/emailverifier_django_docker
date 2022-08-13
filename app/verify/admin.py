@@ -2,12 +2,12 @@ from django.contrib import admin
 from django.db.models import QuerySet
 
 from app.verify.clients import MillionVerifierClient
+from app.verify.models import Verify
 from . import models
 
 
 @admin.register(models.File)
 class FileAdmin(admin.ModelAdmin):
-
     model = models.File
     list_display = (
         'name',
@@ -41,3 +41,14 @@ class VerifyAdmin(admin.ModelAdmin):
         'file', 'email', 'result_code',
         'modified', 'created'
     )
+
+    actions = ['verify_emails']
+
+    @admin.action(description='Проверить почты')
+    def verify_emails(self, request, qs: QuerySet):
+        for email in qs:
+            client = MillionVerifierClient()
+            code_response = client.check_email(email=email.email)
+            Verify.objects.update(
+                result_code=code_response
+            )
