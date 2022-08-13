@@ -31,6 +31,11 @@ class File(UidPrimaryModel, TimeStampedModel, NameModel):
                 result_code=code_response
             )
 
+            if code_response == 1:
+                Message.objects.create(
+                    message_recipient=email_obj,
+                    message_was_sent=False
+                )
 
     FILE_STATUSES = (
         ('new', 'Новый'),
@@ -85,3 +90,25 @@ class Message(UidPrimaryModel, TimeStampedModel):
     class Meta:
         verbose_name = 'Отправка message'
 
+
+@receiver(post_save, sender=File)
+def verify_file(sender, instance, created, **kwargs):
+    if created:
+        print('Some File Detected')
+        try:
+            if instance.status == 'new':
+
+                instance.status = 'processing'
+                instance.save()
+
+                instance.check_emails()
+                instance.status = 'processed'
+                instance.save()
+
+        except Exception as e:
+            print(f'{e.__class__.__name__}: {e}')
+            instance.status = 'error'
+            instance.save()
+
+
+client = MillionVerifierClient()
